@@ -11,16 +11,73 @@ help:
 	@echo "or how to set-up the different environments."
 
 # Use a parallel run (make -j N) for a faster build
-build-all: build-riscv-compliance build-simple-system build-arty-100 \
+build-all: build-riscv-compliance build-simple-mads-system build-simple-cille-system build-simple-system build-arty-100 \
       build-csr-test
 
 
-# RISC-V compliance
-.PHONY: build-riscv-compliance
-build-riscv-compliance:
+# Define a default software program name (fallback if none is provided)
+SW_PROG ?= hello_test
+
+# Define a default value for SKIP_BUILD (can be overridden in the make call)
+SKIP_BUILD ?= false
+
+.PHONY: sw-simple-cille-system simulate-simple-cille-system build-simple-cille-system run-simple-cille-system cat-simple-cille-system-log cat-simple-cille-system-sim-complete
+
+run-simple-cille-system: $(if $(filter false,$(SKIP_BUILD)),build-simple-cille-system,) sw-simple-cille-system simulate-simple-cille-system cat-simple-cille-system-sim-complete
+
+sw-simple-cille-system:
+	$(MAKE) --no-print-directory -C examples/sw/simple_cille_system/$(SW_PROG)
+
+build-simple-cille-system:
 	fusesoc --cores-root=. run --target=sim --setup --build \
-		lowrisc:ibex:ibex_riscv_compliance \
+		lowrisc:ibex:ibex_simple_cille_system \
 		$(FUSESOC_CONFIG_OPTS)
+
+simulate-simple-cille-system:
+	./build/lowrisc_ibex_ibex_simple_cille_system_0/sim-verilator/Vibex_simple_cille_system -t --meminit=ram,./examples/sw/simple_cille_system/$(SW_PROG)/$(SW_PROG).elf
+
+cat-simple-cille-system-log:
+	@cat ./ibex_simple_cille_system.log
+
+cat-simple-cille-system-sim-complete:
+	@echo ""
+	@echo "Simulation complete. Now displaying the log..."
+	@echo ""
+	$(MAKE) --no-print-directory cat-simple-cille-system-log
+
+cille-counter-test:
+	make -C examples/sw/simple_cille_system/counter_test
+	./build/lowrisc_ibex_ibex_simple_cille_system_0/sim-verilator/Vibex_simple_cille_system -t --meminit=ram,./examples/sw/simple_cille_system/counter_test/counter_test.elf
+	cat ibex_simple_cille_system.log
+
+
+# Simple system
+# Use the following targets:
+# - "build-simple-mads-system"
+# - "run-simple-mads-system"
+.PHONY: build-simple-mads-system
+build-simple-mads-system:
+	fusesoc --cores-root=. run --target=sim --setup --build \
+		lowrisc:ibex:ibex_simple_mads_system \
+		$(FUSESOC_CONFIG_OPTS)
+
+simple-mads-system-program = examples/sw/simple_mads_system/hello_test/hello_test.vmem
+sw-simple-hello: $(simple-mads-system-program)
+
+.PHONY: $(simple-mads-system-program)
+$(simple-mads-system-program):
+	cd examples/sw/simple_mads_system/hello_test && $(MAKE)
+
+Vibex_simple_mads_system = \
+      build/lowrisc_ibex_ibex_simple_mads_system_0/sim-verilator/Vibex_simple_mads_system
+$(Vibex_simple_mads_system):
+	@echo "$@ not found"
+	@echo "Run \"make build-simple-mads-system\" to create the dependency"
+	@false
+
+run-simple-mads-system: sw-simple-hello | $(Vibex_simple_mads_system)
+	build/lowrisc_ibex_ibex_simple_mads_system_0/sim-verilator/Vibex_simple_mads_system \
+		--raminit=$(simple-mads-system-program)
 
 
 # Simple system

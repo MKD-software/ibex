@@ -1,0 +1,110 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\title{Notes on IBEX and custom core}
+
+\author{M. K. Dahl}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\section{Quick start}
+
+\section{Notes About Simple System}
+
+The simple system integrates the Ibex core as the host and connects to three slave devices. Below are the details of the system:
+
+\subsection{Host}
+The Ibex core acts as the host in the system. The host is defined as:
+\begin{verbatim}
+typedef enum logic {
+    CoreD
+} bus_host_e;
+\end{verbatim}
+
+\subsection{Slave Devices}
+The system is integrated with three slave devices, which can be accessed using the following addresses:
+\begin{itemize}
+    \item \texttt{00}: RAM
+    \item \texttt{01}: Simulation Control (\texttt{SimCtrl})
+    \item \texttt{10}: Timer
+\end{itemize}
+
+The slave devices are defined as:
+\begin{verbatim}
+typedef enum logic[1:0] {
+    Ram,
+    SimCtrl,
+    Timer
+} bus_device_e;
+\end{verbatim}
+
+\subsection{RAM}
+The RAM has the following characteristics:
+\begin{itemize}
+    \item Depth: \( \frac{1024 \times 1024}{4} = 256\text{k words} \), assuming each word is 4 bytes (32 bits).
+    \item Total size: \( 1024 \times 1024 = 1\text{MB} \), divided by 4 to get 256k words.
+\end{itemize}
+
+The RAM file is set during simulation using the following command:
+\begin{verbatim}
+./build/lowrisc_ibex_ibex_simple_system_0/sim-verilator/Vibex_simple_system [-t] --meminit=ram,<sw_elf_file>
+\end{verbatim}
+Here, \texttt{<sw\_elf\_file>} should be the path to an ELF file (or alternatively a VMEM file).
+
+The RAM is instantiated as:
+\begin{verbatim}
+ram_2p #(
+    .Depth(1024*1024/4)
+)
+\end{verbatim}
+
+The device address mapping for the RAM is configured as follows:
+\begin{verbatim}
+// Device address mapping
+assign cfg_device_addr_mask[Ram] = ~32'hFFFFF; // 1 MB
+\end{verbatim}
+This masks the lower 20 bits, ensuring that everything above 12 bits is set to 0.
+
+\subsection{Other Peripherals}
+\begin{itemize}
+    \item \textbf{BUS:} A simple bus that connects the host to the slave devices.
+    \item \textbf{Simulation Control (\texttt{SimCtrl}):} A peripheral used to write ASCII output to a file.
+    \item \textbf{Timer:} A basic timer with interrupt capabilities.
+\end{itemize}
+
+\subsection{Software Framework}
+The system includes a software framework to interact with the peripherals and manage the system.
+
+\section{Configurations}
+
+
+The following items can be configured in the Ibex core, enabled or disabled. 
+There are 4 support IBEX configs: small, opentita, maxperf and maxperf-pmp-bmbalanced.
+
+\begin{itemize}
+    \item \textbf{RV32E:} Determines whether the core uses the RV32E instruction set, which is a reduced version of the RISC-V instruction set with only 16 general-purpose registers (instead of 32 in RV32I). Set to 0 to disable RV32E and use the full RV32I instruction set.
+    \item \textbf{RV32M:} Specifies the configuration of the multiplier/divider extension (RV32M). \texttt{ibex\_pkg::RV32MFast} enables a fast implementation of the RV32M extension with a 3-cycle multiplier.
+    \item \textbf{RV32B:} Specifies the configuration of the bit manipulation extension (RV32B). \texttt{ibex\_pkg::RV32BNone} disables the RV32B extension.
+    \item \textbf{RegFile:} Configures the type of register file. \texttt{ibex\_pkg::RegFileFF} uses flip-flops for the register file implementation, which provides lower latency but uses more area.
+    \item \textbf{BranchTargetALU:} Enables or disables a dedicated branch target ALU. Set to 0 to disable it, reducing area but increasing branch resolution latency.
+    \item \textbf{WritebackStage:} Configures whether the core has a separate writeback stage in the pipeline. Set to 0 to disable it, simplifying the pipeline but potentially reducing performance.
+    \item \textbf{ICache:} Enables or disables the instruction cache. Set to 0 to disable it, reducing area but increasing instruction fetch latency.
+    \item \textbf{ICacheECC:} Enables or disables error-correcting code (ECC) for the instruction cache. Set to 0 to disable it, reducing area and power consumption.
+    \item \textbf{ICacheScramble:} Enables or disables scrambling for the instruction cache. Set to 0 to disable it, simplifying the design.
+    \item \textbf{BranchPredictor:} Enables or disables the branch predictor. Set to 0 to disable it, reducing area but increasing branch misprediction penalties.
+    \item \textbf{DbgTriggerEn:} Enables or disables debug triggers. Set to 0 to disable them, reducing area.
+    \item \textbf{SecureIbex:} Enables or disables security features in the Ibex core. Set to 0 to disable them, simplifying the design.
+    \item \textbf{PMPEnable:} Enables or disables the Physical Memory Protection (PMP) feature. Set to 0 to disable it, reducing area.
+    \item \textbf{PMPGranularity:} Configures the granularity of PMP regions. Set to 0 for the default granularity.
+    \item \textbf{PMPNumRegions:} Specifies the number of PMP regions. Higher values allow for more memory regions to be protected, increasing flexibility but also area.
+    \item \textbf{MHPMCounterNum:} Specifies the number of hardware performance monitoring counters. Set to 0 to disable them, reducing area.
+    \item \textbf{MHPMCounterWidth:} Specifies the width (in bits) of the hardware performance monitoring counters. Wider counters allow for larger values to be recorded, reducing the risk of overflow during long-running measurements.
+\end{itemize}
+
+\end{document}
