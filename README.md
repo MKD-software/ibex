@@ -1,3 +1,13 @@
+# Custom RISC-V core study based on IBEX core
+
+Working with and studying risc-v core intregration.
+
+ToDo:
+
+Fix counter.sv module.
+
+
+
 [Ibex OpenTitan configuration Nightly Regression](https://ibex.reports.lowrisc.org/opentitan/latest/report.html)
 <a href="https://ibex.reports.lowrisc.org/opentitan/latest/report.html">
   <img src="https://ibex.reports.lowrisc.org/opentitan/latest/summary.svg">
