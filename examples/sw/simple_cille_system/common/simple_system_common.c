@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "simple_system_common.h"
+#define MULTER_ADDR ((volatile uint32_t *)0x40000)
+
 
 int putchar(int c) {
   DEV_WRITE(SIM_CTRL_BASE + SIM_CTRL_OUT, (unsigned char)c);
@@ -184,6 +186,8 @@ void simple_timer_handler(void) {
   time_elapsed++;
 }
 
+
+
 volatile uint32_t count_elapsed;
 uint32_t count_increment;
 
@@ -204,68 +208,11 @@ void count_update(uint32_t new_count) {
   *(volatile uint32_t*)COUNTER_BASE = new_count;
 }
 
-// // Update the counter compare register (32-bit)
-// void count_update(uint32_t new_count) {
-//   DEV_WRITE(COUNTER_BASE, new_count);
-// }
 
+uint32_t multer_compute(uint16_t num1, uint16_t num2) {
+  uint32_t packed_value = ((uint32_t)num2 << 16) | num1;  // Pack into 32-bit
+  *MULTER_ADDR = packed_value;  // Write to multiplier
+  return *MULTER_ADDR;  // Read and return the result
+}
 
-/* Counter functions-----------------*/
-
-// // Global variables for counter timing (32-bit)
-// volatile uint32_t count_elapsed;
-// uint32_t count_increment;
-
-// // Update the compare value by reading the current counter value,
-// // adding the base increment, and then writing the new compare value.
-// inline static void increment_countcmp(uint32_t count_base) {
-//   uint32_t current_count = counter_read();
-//   current_count += count_base;
-//   countcmp_update(current_count);
-// }
-
-// // Enable the counter peripheral by initializing the elapsed counter,
-// // setting the increment value, updating the compare register, and enabling interrupts.
-// void counter_enable(uint32_t count_base) {
-//   count_elapsed = 0;
-//   count_increment = count_base;
-//   // Set the compare value for the counter
-//   increment_countcmp(count_base);
-//   // Enable counter interrupt: set the Machine Interrupt Enable for timer (bit 7)
-//   //asm volatile("csrs mie, %0\n" : : "r"(0x80));
-//   // Enable global interrupts: set the Machine Status Register interrupt bit
-//   //asm volatile("csrs mstatus, %0\n" : : "r"(0x8));
-// }
-
-// // Disable counter interrupts
-// void counter_disable(void) { 
-//   asm volatile("csrc mie, %0\n" : : "r"(0x80)); 
-// }
-
-// // Read the current counter value from the memory-mapped register (32-bit)
-// uint32_t counter_read(void) {
-//   return DEV_READ(COUNTER_BASE + TIMER_MTIMECMP, 0);
-// }
-
-// // Update the counter compare register (32-bit)
-// void countcmp_update(uint32_t new_count) {
-//   DEV_WRITE(COUNTER_BASE + TIMER_MTIMECMP, -1);
-//   DEV_WRITE(COUNTER_BASE + TIMER_MTIMECMP, new_count);
-// }
-
-// // Return the elapsed count value
-// uint32_t get_elapsed_count(void) { 
-//   return count_elapsed; 
-// }
-
-// // Interrupt handler for the counter
-// // (Make sure this handler is correctly registered in your vector table)
-// void simple_counter_handler(void) __attribute__((interrupt));
-
-// void simple_counter_handler(void) {
-//   // Update the compare value so that the next interrupt is scheduled
-//   increment_countcmp(count_increment);
-//   // Increment the elapsed counter
-//   count_elapsed++;
-// }
 

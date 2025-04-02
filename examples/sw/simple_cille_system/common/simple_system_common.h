@@ -110,6 +110,10 @@ uint32_t counter_read(void);
 void count_update(uint32_t new_count);
 
 
+// Function to write two 16-bit numbers to the multiplier and read the result
+uint32_t multer_compute(uint16_t num1, uint16_t num2);
+
+
 /**
  * Enables/disables the instruction cache. This has no effect on Ibex
  * configurations that do not have an instruction cache and in particular is

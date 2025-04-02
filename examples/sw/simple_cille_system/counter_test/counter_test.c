@@ -17,41 +17,18 @@ int main(int argc, char **argv) {
   puts("Use cmd: gtkwave sim.fst in root\n");
 
 
-  #define TARGET_ADDR ((volatile uint32_t *)0x40000)
-
-  uint32_t known_value = 0xDEADBEEF;
-
-  *TARGET_ADDR = known_value;  // Write to the memory address
-  uint32_t read_value = *TARGET_ADDR;  // Read from the memory address
-
+  uint16_t a = 3, b = 4;
+  uint32_t result = multer_compute(a, b);
   
-  puts("Read value: ");
-  puthex(read_value);
+  puts("Multer value: ");
+  puthex(result);
   puts("\n");
 
   pcount_enable(0);
 
-  // Enable periodic timer interrupt
-  // (the actual timebase is a bit meaningless in simulation)
   timer_enable(2000);
-
-  counter_enable(0);
-
   
-  uint32_t last_elapsed_count = counter_read();
-  puts("Initial elapsed count: ");
-  puthex(last_elapsed_count);
-
-  
-  //count_update(100);  // Set the compare value to maximum
-  last_elapsed_count = counter_read();
-  puts("\nInitial elapsed count: ");
-  puthex(last_elapsed_count);
-  puts("\n");
-
-  DEV_WRITE(TIMER_BASE,100);
-
-  timecmp_update(100);  // Set the compare value to maximum
+  timecmp_update(1000);  // Set the compare value
 
   uint64_t last_elapsed_time = get_elapsed_time();
 
@@ -70,11 +47,6 @@ int main(int argc, char **argv) {
     }
     asm volatile("wfi");  // Wait for interrupt (simulation purpose)
   }
-
-  last_elapsed_time = get_elapsed_time();
-  puts("Final elapsed time: ");
-  puthex(last_elapsed_time);
-  puts("\n");
 
   return 0;
 }

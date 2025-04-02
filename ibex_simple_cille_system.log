@@ -2,11 +2,8 @@
 This is a simple test to check the implementation of the counter.sv module
 Check the value is correct in GTKWave on the counter_d signal
 Use cmd: gtkwave sim.fst in root
-Read value: DEADBEEF
-Initial elapsed count: DEADC000
-Initial elapsed count: DEADC100
+Multer value: 0000000C
 Tock!
 Tick!
 Tock!
 Tick!
-Final elapsed time: 00000006
