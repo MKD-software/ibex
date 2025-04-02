@@ -201,8 +201,13 @@ uint32_t counter_read(void) {
 
 // Update the counter compare register (32-bit)
 void count_update(uint32_t new_count) {
-  DEV_WRITE(COUNTER_BASE, new_count);
+  *(volatile uint32_t*)COUNTER_BASE = new_count;
 }
+
+// // Update the counter compare register (32-bit)
+// void count_update(uint32_t new_count) {
+//   DEV_WRITE(COUNTER_BASE, new_count);
+// }
 
 
 /* Counter functions-----------------*/

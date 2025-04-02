@@ -2,6 +2,7 @@
 
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage[table]{xcolor} % For row coloring
 
 \title{Notes on IBEX and custom core}
 
@@ -85,26 +86,37 @@ The system includes a software framework to interact with the peripherals and ma
 
 
 The following items can be configured in the Ibex core, enabled or disabled. 
-There are 4 support IBEX configs: small, opentita, maxperf and maxperf-pmp-bmbalanced.
+There are 4 support IBEX configs: small, opentitan, maxperf and maxperf-pmp-bmbalanced.
 
-\begin{itemize}
-    \item \textbf{RV32E:} Determines whether the core uses the RV32E instruction set, which is a reduced version of the RISC-V instruction set with only 16 general-purpose registers (instead of 32 in RV32I). Set to 0 to disable RV32E and use the full RV32I instruction set.
-    \item \textbf{RV32M:} Specifies the configuration of the multiplier/divider extension (RV32M). \texttt{ibex\_pkg::RV32MFast} enables a fast implementation of the RV32M extension with a 3-cycle multiplier.
-    \item \textbf{RV32B:} Specifies the configuration of the bit manipulation extension (RV32B). \texttt{ibex\_pkg::RV32BNone} disables the RV32B extension.
-    \item \textbf{RegFile:} Configures the type of register file. \texttt{ibex\_pkg::RegFileFF} uses flip-flops for the register file implementation, which provides lower latency but uses more area.
-    \item \textbf{BranchTargetALU:} Enables or disables a dedicated branch target ALU. Set to 0 to disable it, reducing area but increasing branch resolution latency.
-    \item \textbf{WritebackStage:} Configures whether the core has a separate writeback stage in the pipeline. Set to 0 to disable it, simplifying the pipeline but potentially reducing performance.
-    \item \textbf{ICache:} Enables or disables the instruction cache. Set to 0 to disable it, reducing area but increasing instruction fetch latency.
-    \item \textbf{ICacheECC:} Enables or disables error-correcting code (ECC) for the instruction cache. Set to 0 to disable it, reducing area and power consumption.
-    \item \textbf{ICacheScramble:} Enables or disables scrambling for the instruction cache. Set to 0 to disable it, simplifying the design.
-    \item \textbf{BranchPredictor:} Enables or disables the branch predictor. Set to 0 to disable it, reducing area but increasing branch misprediction penalties.
-    \item \textbf{DbgTriggerEn:} Enables or disables debug triggers. Set to 0 to disable them, reducing area.
-    \item \textbf{SecureIbex:} Enables or disables security features in the Ibex core. Set to 0 to disable them, simplifying the design.
-    \item \textbf{PMPEnable:} Enables or disables the Physical Memory Protection (PMP) feature. Set to 0 to disable it, reducing area.
-    \item \textbf{PMPGranularity:} Configures the granularity of PMP regions. Set to 0 for the default granularity.
-    \item \textbf{PMPNumRegions:} Specifies the number of PMP regions. Higher values allow for more memory regions to be protected, increasing flexibility but also area.
-    \item \textbf{MHPMCounterNum:} Specifies the number of hardware performance monitoring counters. Set to 0 to disable them, reducing area.
-    \item \textbf{MHPMCounterWidth:} Specifies the width (in bits) of the hardware performance monitoring counters. Wider counters allow for larger values to be recorded, reducing the risk of overflow during long-running measurements.
-\end{itemize}
+\begin{table}[h!]
+    \centering
+    \rowcolors{2}{gray!15}{white}
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{|l|p{7cm}|p{5cm}|l|}
+    \hline
+    \rowcolor{gray!30} \textbf{Name} & \textbf{Description} & \textbf{Possible Values} & \textbf{Value in Cille} \\ \hline
+    RV32E & Determines whether the core uses the RV32E instruction set (16 general-purpose registers instead of 32). & 0 (disabled), 1 (enabled) & 0 \\ \hline
+    RV32M & Configures the multiplier/divider extension. & \texttt{ibex\_pkg::RV32MNone}, \texttt{RV32MSingleCycle}, \texttt{RV32MFast} & \texttt{RV32MSingleCycle} \\ \hline
+    RV32B & Configures the bit manipulation extension. & \texttt{ibex\_pkg::RV32BNone}, \texttt{RV32BOTEarlGrey} & \texttt{RV32BOTEarlGrey} \\ \hline
+    RegFile & Type of register file used in the core. & \texttt{ibex\_pkg::RegFileFF}, \texttt{RegFileLatch} & \texttt{RegFileFF} \\ \hline
+    BranchTargetALU & Enables a dedicated ALU for branch target calculation. & 0 (disabled), 1 (enabled) & 1 \\ \hline
+    WritebackStage & Enables a separate writeback stage in the pipeline. & 0 (disabled), 1 (enabled) & 1 \\ \hline
+    ICache & Enables the instruction cache. & 0 (disabled), 1 (enabled) & 1 \\ \hline
+    ICacheECC & Enables error-correcting code (ECC) for the instruction cache. & 0 (disabled), 1 (enabled) & 1 \\ \hline
+    ICacheScramble & Enables scrambling for instruction cache contents. & 0 (disabled), 1 (enabled) & 1 \\ \hline
+    BranchPredictor & Enables the branch predictor for speculative execution. & 0 (disabled), 1 (enabled) & 1 \\ \hline
+    DbgTriggerEn & Enables hardware debug triggers. & 0 (disabled), 1 (enabled) & 1 \\ \hline
+    SecureIbex & Enables security features in the Ibex core. & 0 (disabled), 1 (enabled) & 1 \\ \hline
+    PMPEnable & Enables the Physical Memory Protection (PMP) feature. & 0 (disabled), 1 (enabled) & 1 \\ \hline
+    PMPGranularity & Defines the granularity of PMP regions (0 = default, higher values for finer granularity). & Integer values & 0 \\ \hline
+    PMPNumRegions & Specifies the number of PMP regions available. & 0, 8, 16 & 16 \\ \hline
+    MHPMCounterNum & Number of hardware performance monitoring counters. & 0, 4, 10 & 10 \\ \hline
+    MHPMCounterWidth & Bit width of hardware performance monitoring counters. & 32, 64 & 32 \\ \hline
+    \end{tabular}
+    }
+    \caption{Configuration options for the Cille configuration of the Ibex core.}
+    \label{tab:cille_config}
+\end{table}
+
 
 \end{document}

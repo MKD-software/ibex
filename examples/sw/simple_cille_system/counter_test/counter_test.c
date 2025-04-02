@@ -5,6 +5,7 @@
 #include "simple_system_common.h"
 #define COUNTER_BASE_ADDR 0x40000  // Base address of the counter
 #define COUNTER_OFFSET     0x0     // Offset (assuming the counter value is at base)
+#define TARGET_ADDR ((volatile uint32_t *)0x40000)
 
 int main(int argc, char **argv) {
   pcount_enable(0);
@@ -16,11 +17,17 @@ int main(int argc, char **argv) {
   puts("Use cmd: gtkwave sim.fst in root\n");
 
 
-  // volatile uint32_t *ptr = (volatile uint32_t *)COUNTER_BASE;
-  // *ptr = 0x12345678;  // Try writing a test value
-  // uint32_t value = *ptr;
-  // puthex(value);
+  #define TARGET_ADDR ((volatile uint32_t *)0x40000)
+
+  uint32_t known_value = 0xDEADBEEF;
+
+  *TARGET_ADDR = known_value;  // Write to the memory address
+  uint32_t read_value = *TARGET_ADDR;  // Read from the memory address
+
   
+  puts("Read value: ");
+  puthex(read_value);
+  puts("\n");
 
   pcount_enable(0);
 
@@ -35,12 +42,16 @@ int main(int argc, char **argv) {
   puts("Initial elapsed count: ");
   puthex(last_elapsed_count);
 
-  count_update(100);  // Set the compare value to maximum
+  
+  //count_update(100);  // Set the compare value to maximum
   last_elapsed_count = counter_read();
   puts("\nInitial elapsed count: ");
   puthex(last_elapsed_count);
   puts("\n");
 
+  DEV_WRITE(TIMER_BASE,100);
+
+  timecmp_update(100);  // Set the compare value to maximum
 
   uint64_t last_elapsed_time = get_elapsed_time();
 

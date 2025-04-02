@@ -50,6 +50,13 @@ lint_off -rule UNUSED -file "*/rtl/sim/simulator_ctrl.sv" -match "*'wdata_i'[31:
 // entire 32-bit address around to make the code a bit cleaner.
 lint_off -rule UNUSED -file "*/rtl/timer.sv" -match "*'timer_addr_i'[31:10]*"
 
+// Bits of signal are not used: counter_addr_i[31:10]
+//
+// The upper bits of this address are used to select whether the timer is
+// addressed at all (encoded in the timer_req_i input). However, we pass the
+// entire 32-bit address around to make the code a bit cleaner.
+lint_off -rule UNUSED -file "*/rtl/counter.sv" -match "*'counter_addr_i'[31:10]*"
+
 // Signal is not used: clk_i
 // leaving clk and reset connected in-case we want to add assertions
 lint_off -rule UNUSED -file "*/rtl/ibex_pmp.sv" -match "*clk_i*"

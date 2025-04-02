@@ -5,15 +5,20 @@ Working with and studying risc-v core intregration.
 ToDo:
 
 Fix counter.sv module.
+Figure out how to write to a register through the SW. 
 
+
+
+
+
+
+# Ibex RISC-V Core
 
 
 [Ibex OpenTitan configuration Nightly Regression](https://ibex.reports.lowrisc.org/opentitan/latest/report.html)
 <a href="https://ibex.reports.lowrisc.org/opentitan/latest/report.html">
   <img src="https://ibex.reports.lowrisc.org/opentitan/latest/summary.svg">
 </a>
-
-# Ibex RISC-V Core
 
 Ibex is a production-quality open source 32-bit RISC-V CPU core written in
 SystemVerilog. The CPU core is heavily parametrizable and well suited for
