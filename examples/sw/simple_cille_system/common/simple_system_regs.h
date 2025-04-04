@@ -15,6 +15,12 @@
 #define TIMER_MTIMECMP 0x8
 #define TIMER_MTIMECMPH 0xC
 
-#define COUNTER_BASE 0x40000
+//#define COUNTER_BASE 0x40000
+
+#define STRIDER_BASE 0x40000
+#define BASE_ADDR 0x0
+#define ROW_STRIDE 0x4
+#define COL_STRIDE 0x8
+#define NEW_ADDR 0xC
 
 #endif  // SIMPLE_SYSTEM_REGS_H__

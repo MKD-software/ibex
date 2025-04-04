@@ -18,6 +18,8 @@ filesets:
       - ./rtl/timer.sv
       - ./rtl/counter.sv
       - ./rtl/multer.sv
+      - ./rtl/strider.sv
+
     file_type: systemVerilogSource
 
 targets:

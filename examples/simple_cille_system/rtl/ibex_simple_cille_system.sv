@@ -327,22 +327,40 @@ module ibex_simple_cille_system (
       .timer_intr_o   (timer_irq)
     );
 
-  multer #(
-    .DataWidth    (32),
-    .AddressWidth (32)
-    ) u_multer (
-      .clk_i          (clk_sys),
-      .rst_ni         (rst_sys_n),
+    strider #(
+      .DataWidth    (32),
+      .AddressWidth (32)
+    ) u_strider (
+        .clk_i          (clk_sys),
+        .rst_ni         (rst_sys_n),
+  
+        .stride_req_i    (device_req[Counter]),
+        .stride_we_i     (device_we[Counter]),
+        .stride_be_i     (device_be[Counter]),
+        .stride_addr_i   (device_addr[Counter]),
+        .stride_wdata_i  (device_wdata[Counter]),
+        .stride_rvalid_o (device_rvalid[Counter]),
+        .stride_rdata_o  (device_rdata[Counter]),
+        .stride_err_o    (device_err[Counter])
+  );
+  
 
-      .mult_req_i    (device_req[Counter]),
-      .mult_we_i     (device_we[Counter]),
-      .mult_be_i     (device_be[Counter]),
-      .mult_addr_i   (device_addr[Counter]),
-      .mult_wdata_i  (device_wdata[Counter]),
-      .mult_rvalid_o (device_rvalid[Counter]),
-      .mult_rdata_o  (device_rdata[Counter]),
-      .mult_err_o    (device_err[Counter])
-);
+//   multer #(
+//     .DataWidth    (32),
+//     .AddressWidth (32)
+//     ) u_multer (
+//       .clk_i          (clk_sys),
+//       .rst_ni         (rst_sys_n),
+
+//       .mult_req_i    (device_req[Counter]),
+//       .mult_we_i     (device_we[Counter]),
+//       .mult_be_i     (device_be[Counter]),
+//       .mult_addr_i   (device_addr[Counter]),
+//       .mult_wdata_i  (device_wdata[Counter]),
+//       .mult_rvalid_o (device_rvalid[Counter]),
+//       .mult_rdata_o  (device_rdata[Counter]),
+//       .mult_err_o    (device_err[Counter])
+// );
 
 //   counter #(
 //     .DataWidth    (32),

@@ -20,6 +20,34 @@ int puts(const char *str) {
   return 0;
 }
 
+void print_int(int num) {
+  char buffer[12]; // Enough for 32-bit int (-2147483648 to 2147483647)
+  int i = 0, is_negative = 0;
+
+  // Handle negative numbers
+  if (num < 0) {
+      is_negative = 1;
+      num = -num;
+  }
+
+  // Convert digits to string (in reverse order)
+  do {
+      buffer[i++] = (num % 10) + '0';
+      num /= 10;
+  } while (num > 0);
+
+  // Add negative sign if needed
+  if (is_negative) {
+      buffer[i++] = '-';
+  }
+
+  // Print in correct order
+  while (i--) {
+      putchar(buffer[i]);
+  }
+}
+
+
 void puthex(uint32_t h) {
   int cur_digit;
   // Iterate through h taking top 4 bits each time and outputting ASCII of hex
