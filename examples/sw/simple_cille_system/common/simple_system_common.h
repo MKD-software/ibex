@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #ifndef SIMPLE_SYSTEM_COMMON_H__
-
+#define COUNTER_BASE ((volatile uint32_t *)0x40000)
 #include <stdint.h>
 
 #include "simple_system_regs.h"

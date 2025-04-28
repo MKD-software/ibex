@@ -8,7 +8,18 @@ Fix counter.sv module.
 Figure out how to write to a register through the SW. 
 
 
+## Quick start guide
+ 
+* Open WSL terminal
 
+* Install tools and such
+
+* run
+
+ ```
+make run-simple-cille-system
+make cille-counter-test
+```
 
 
 
