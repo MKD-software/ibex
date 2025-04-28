@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
   puts("Use cmd: gtkwave sim.fst in root\n\n");
 
   puts("Base adress before stride: ");
-  puthex(SLAVE_ADDR);
+  puthex(*SLAVE_ADDR);
   puts("\n");
 
   puts("\nApplying window at the adress......\n");
