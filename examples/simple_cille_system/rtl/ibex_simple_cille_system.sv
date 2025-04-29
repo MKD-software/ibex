@@ -35,6 +35,26 @@ module ibex_simple_cille_system (
   input IO_RST_N
 );
 
+  localparam logic [31:0] MEM_SIZE   = 1024*1024; // 1 MB
+  localparam logic [31:0] MEM_START     = 32'h00100000;
+  localparam logic [31:0] MEM_MASK      = ~32'hFFFFF;
+
+  localparam logic [31:0] SIMCTRL_BASE = 32'h20000;
+  localparam logic [31:0] SIMCTRL_MASK = ~32'h3FF; // 1 kB
+
+  localparam logic [31:0] TIMER_BASE   = 32'h30000;
+  localparam logic [31:0] TIMER_MASK   = ~32'h3FF; // 1 kB
+
+  localparam logic [31:0] STRIDER_BASE = 32'h40000;
+  localparam logic [31:0] STRIDER_MASK = ~32'h3FF; // 1 kB
+
+  localparam logic [31:0] COUNTER_BASE = 32'h50000;
+  localparam logic [31:0] COUNTER_MASK = ~32'h3FF; // 1 kB
+
+  localparam logic [31:0] MULTER_BASE = 32'h60000;
+  localparam logic [31:0] MULTER_MASK = ~32'h3FF; // 1 kB
+
+
   parameter bit                 SecureIbex               = 1'b0;
   parameter bit                 ICacheScramble           = 1'b0;
   parameter bit                 PMPEnable                = 1'b0;
@@ -60,14 +80,16 @@ module ibex_simple_cille_system (
     CoreD
   } bus_host_e;
 
-  typedef enum logic[1:0] {
+  typedef enum int {
     Ram,
     SimCtrl,
     Timer,
-    Counter
+    Strider,
+    Counter,
+    Multer
   } bus_device_e;
 
-  localparam int NrDevices = 4;
+  localparam int NrDevices = 6;
   localparam int NrHosts = 1;
 
   // interrupts
@@ -100,14 +122,19 @@ module ibex_simple_cille_system (
   // Device address mapping
   logic [31:0] cfg_device_addr_base [NrDevices];
   logic [31:0] cfg_device_addr_mask [NrDevices];
-  assign cfg_device_addr_base[Ram] = 32'h100000;
-  assign cfg_device_addr_mask[Ram] = ~32'hFFFFF; // 1 MB
-  assign cfg_device_addr_base[SimCtrl] = 32'h20000;
-  assign cfg_device_addr_mask[SimCtrl] = ~32'h3FF; // 1 kB
-  assign cfg_device_addr_base[Timer] = 32'h30000;
-  assign cfg_device_addr_mask[Timer] = ~32'h3FF; // 1 kB
-  assign cfg_device_addr_base[Counter] = 32'h40000;
-  assign cfg_device_addr_mask[Counter] = ~32'h3FF; // 1 kB
+
+  assign cfg_device_addr_base[Ram]     =      MEM_START;
+  assign cfg_device_addr_mask[Ram]     =      MEM_MASK; // 1 MB
+  assign cfg_device_addr_base[SimCtrl] =  SIMCTRL_BASE;
+  assign cfg_device_addr_mask[SimCtrl] =  SIMCTRL_MASK; // 1 kB
+  assign cfg_device_addr_base[Timer]    =    TIMER_BASE;
+  assign cfg_device_addr_mask[Timer]    =    TIMER_MASK; // 1 kB
+  assign cfg_device_addr_base[Strider] =  STRIDER_BASE;
+  assign cfg_device_addr_mask[Strider] =  STRIDER_MASK; // 1 kB
+  assign cfg_device_addr_base[Counter] =  COUNTER_BASE;
+  assign cfg_device_addr_mask[Counter] =  COUNTER_MASK; // 1 kB
+  assign cfg_device_addr_base[Multer] =   MULTER_BASE;
+  assign cfg_device_addr_mask[Multer] =   MULTER_MASK; // 1 kB
 
   // Instruction fetch signals
   logic instr_req;
@@ -269,9 +296,11 @@ module ibex_simple_cille_system (
       .core_sleep_o           ()
     );
 
+
+    
   // SRAM block for instruction and data storage
   ram_2p #(
-      .Depth(1024*1024/4),
+      .Depth(MEM_SIZE / 4),
       .MemInitFile(SRAMInitFile)
     ) u_ram (
       .clk_i       (clk_sys),
@@ -334,50 +363,50 @@ module ibex_simple_cille_system (
         .clk_i          (clk_sys),
         .rst_ni         (rst_sys_n),
   
-        .stride_req_i    (device_req[Counter]),
-        .stride_we_i     (device_we[Counter]),
-        .stride_be_i     (device_be[Counter]),
-        .stride_addr_i   (device_addr[Counter]),
-        .stride_wdata_i  (device_wdata[Counter]),
-        .stride_rvalid_o (device_rvalid[Counter]),
-        .stride_rdata_o  (device_rdata[Counter]),
-        .stride_err_o    (device_err[Counter])
+        .stride_req_i    (device_req[Strider]),
+        .stride_we_i     (device_we[Strider]),
+        .stride_be_i     (device_be[Strider]),
+        .stride_addr_i   (device_addr[Strider]),
+        .stride_wdata_i  (device_wdata[Strider]),
+        .stride_rvalid_o (device_rvalid[Strider]),
+        .stride_rdata_o  (device_rdata[Strider]),
+        .stride_err_o    (device_err[Strider])
   );
   
 
-//   multer #(
-//     .DataWidth    (32),
-//     .AddressWidth (32)
-//     ) u_multer (
-//       .clk_i          (clk_sys),
-//       .rst_ni         (rst_sys_n),
+  multer #(
+    .DataWidth    (32),
+    .AddressWidth (32)
+    ) u_multer (
+      .clk_i          (clk_sys),
+      .rst_ni         (rst_sys_n),
 
-//       .mult_req_i    (device_req[Counter]),
-//       .mult_we_i     (device_we[Counter]),
-//       .mult_be_i     (device_be[Counter]),
-//       .mult_addr_i   (device_addr[Counter]),
-//       .mult_wdata_i  (device_wdata[Counter]),
-//       .mult_rvalid_o (device_rvalid[Counter]),
-//       .mult_rdata_o  (device_rdata[Counter]),
-//       .mult_err_o    (device_err[Counter])
-// );
+      .mult_req_i    (device_req[Multer]),
+      .mult_we_i     (device_we[Multer]),
+      .mult_be_i     (device_be[Multer]),
+      .mult_addr_i   (device_addr[Multer]),
+      .mult_wdata_i  (device_wdata[Multer]),
+      .mult_rvalid_o (device_rvalid[Multer]),
+      .mult_rdata_o  (device_rdata[Multer]),
+      .mult_err_o    (device_err[Multer])
+);
 
-//   counter #(
-//     .DataWidth    (32),
-//     .AddressWidth (32)
-//     ) u_counter (
-//       .clk_i          (clk_sys),
-//       .rst_ni         (rst_sys_n),
+  counter #(
+    .DataWidth    (32),
+    .AddressWidth (32)
+    ) u_counter (
+      .clk_i          (clk_sys),
+      .rst_ni         (rst_sys_n),
 
-//       .counter_req_i    (device_req[Counter]),
-//       .counter_we_i     (device_we[Counter]),
-//       .counter_be_i     (device_be[Counter]),
-//       .counter_addr_i   (device_addr[Counter]),
-//       .counter_wdata_i  (device_wdata[Counter]),
-//       .counter_rvalid_o (device_rvalid[Counter]),
-//       .counter_rdata_o  (device_rdata[Counter]),
-//       .counter_err_o    (device_err[Counter])
-// );
+      .counter_req_i    (device_req[Counter]),
+      .counter_we_i     (device_we[Counter]),
+      .counter_be_i     (device_be[Counter]),
+      .counter_addr_i   (device_addr[Counter]),
+      .counter_wdata_i  (device_wdata[Counter]),
+      .counter_rvalid_o (device_rvalid[Counter]),
+      .counter_rdata_o  (device_rdata[Counter]),
+      .counter_err_o    (device_err[Counter])
+);
 
 
 
