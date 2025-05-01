@@ -21,6 +21,41 @@ SW_PROG ?= hello_test
 # Define a default value for SKIP_BUILD (can be overridden in the make call)
 SKIP_BUILD ?= false
 
+
+.PHONY: sw-cille-demo-system simulate-cille-demo-system build-cille-demo-system run-cille-demo-system cat-cille-demo-system-log cat-cille-demo-system-sim-complete
+
+run-cille-demo-system: $(if $(filter false,$(SKIP_BUILD)),build-cille-demo-system,) sw-cille-demo-system simulate-cille-demo-system cat-cille-demo-system-sim-complete
+
+sw-cille-demo-system:
+	$(MAKE) --no-print-directory -C examples/sw/cille_demo_system/$(SW_PROG)
+
+build-cille-demo-system:
+	fusesoc --cores-root=. run --target=sim --setup --build \
+		lowrisc:ibex:cille_demo_system \
+		$(FUSESOC_CONFIG_OPTS)
+
+simulate-cille-demo-system:
+	./build/lowrisc_ibex_cille_demo_system_0/sim-verilator/Vcille_demo_system -t --meminit=ram,./examples/sw/cille_demo_system/$(SW_PROG)/$(SW_PROG).elf
+
+cat-cille-demo-system-log:
+	@cat ./cille_demo_system.log
+
+cat-cille-demo-system-sim-complete:
+	@echo ""
+	@echo "Simulation complete. Now displaying the log..."
+	@echo ""
+	$(MAKE) --no-print-directory cat-cille-demo-system-log
+
+cille-demo-test:
+	make -C examples/sw/cille_demo_system/counter_test
+	./build/lowrisc_ibex_cille_demo_system_0/sim-verilator/Vcille_demo_system -t --meminit=ram,./examples/sw/cille_demo_system/counter_test/counter_test.elf
+	cat cille_demo_system.log
+
+
+
+
+
+
 .PHONY: sw-simple-cille-system simulate-simple-cille-system build-simple-cille-system run-simple-cille-system cat-simple-cille-system-log cat-simple-cille-system-sim-complete
 
 run-simple-cille-system: $(if $(filter false,$(SKIP_BUILD)),build-simple-cille-system,) sw-simple-cille-system simulate-simple-cille-system cat-simple-cille-system-sim-complete

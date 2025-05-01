@@ -1,6 +1,6 @@
-PWD c:\ibex\examples\simple_cille_system\Notes
+PWD c:\ibex\Notes
 INPUT C:\Users\au585732\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT c:\ibex\examples\simple_cille_system\Notes\Notes.tex
+INPUT c:\ibex\Notes\Notes.tex
 OUTPUT Notes.log
 INPUT C:\Users\au585732\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls
 INPUT C:\Users\au585732\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls

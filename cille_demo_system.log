@@ -1,0 +1,16 @@
+
+This is a simple test to check the implementation of the strider.sv module
+Use cmd: gtkwave sim.fst in root
+
+Base adress before stride: 00000000
+
+Applying window at the adress......
+Move window 3 down and 4 right with stride of 2
+Calculated adress after stride: 0004000E
+
+Applying window at the new adress......
+Move window 3 down and 4 right with stride of 2
+Calculated adress after stride: 0004001C
+
+Applying window at the new adress......
+Simulation finished
